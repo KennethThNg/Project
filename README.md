@@ -15,16 +15,16 @@ AAAAAAAAAAA **END REHAN VERSION**
 A list of research questions you would like to address during the project.
 
 ## General questions
-- with who Hillary exchanges emails ? (network)
-- what is the frequency exchanges in general ? according to these people ?
-- which countries are most addressed ? Are some ignored ?
-- what are the main subjects ? according to countries ? according to people ?
+- with who Hillary exchanges emails? (network)
+- what is the frequency exchanges in general ? according to these people?
+- which countries are most addressed ? Are some ignored?
+- what are the main subjects ? according to countries ? according to people?
 
 ## Technical questions
-- How can we properly clean the data (handle with rawText) ?
-- How can we find the country that the mail is addressed ?
-- How can we define the main subjects (define the categories of interest) ?
-- Which visualization tools shall we use for countries lexicography fields ? for network representation ? for exchange frequency ? for addressed countries ? etc
+- How can we properly clean the data (handle with rawText)?
+- How can we find the country that the mail is addressed?
+- How can we define the main subjects (define the categories of interest)?
+- Which visualization tools shall we use for countries lexicography fields? for network representation? for exchange frequency? for addressed countries? etc
 
 
 # Dataset
@@ -59,9 +59,57 @@ Once this extraction made, one difficulty will be to catch the main information 
 
 We may include external datasets or knowledge: governemantal position of people, sex, world events in timeline, etc. However it is not decided yet if we will include them or not. We have first to deal with the current datasets.
 
+**REHAN VERSION**
 
+_List the dataset(s) you want to use, and some ideas on how do you expect to get, manage, process and enrich it/them. Show us you've read the docs and some examples, and you've a clear idea on what to expect. Discuss data size and format if relevant._
 
-List the dataset(s) you want to use, and some ideas on how do you expect to get, manage, process and enrich it/them. Show us you've read the docs and some examples, and you've a clear idea on what to expect. Discuss data size and format if relevant.
+Kaggle provides the same data in two different format: four csv files VS one sqlite file. We quickly **over**read both and assume they are the same. The use of sqlite seems to be a better choice since we will manipulate textual combined in a relation entity fashion. The SQL commands to create the schema are provided below:
+
+    -- 7945 returned by the command `COUNT(*)`
+    CREATE TABLE Emails (
+        Id INTEGER PRIMARY KEY,
+        DocNumber TEXT,
+        MetadataSubject TEXT,
+        MetadataTo TEXT,
+        MetadataFrom TEXT,
+        SenderPersonId INTEGER,
+        MetadataDateSent TEXT,
+        MetadataDateReleased TEXT,
+        MetadataPdfLink TEXT,
+        MetadataCaseNumber TEXT,
+        MetadataDocumentClass TEXT,
+        ExtractedSubject TEXT,
+        ExtractedTo TEXT,
+        ExtractedFrom TEXT,
+        ExtractedCc TEXT,
+        ExtractedDateSent TEXT,
+        ExtractedCaseNumber TEXT,
+        ExtractedDocNumber TEXT,
+        ExtractedDateReleased TEXT,
+        ExtractedReleaseInPartOrFull TEXT,
+        ExtractedBodyText TEXT,
+        RawText TEXT);
+
+    -- 513 returned by the command `COUNT(*)`
+    CREATE TABLE Persons (
+        Id INTEGER PRIMARY KEY,
+        Name TEXT);
+
+    -- 850 returned by the command `COUNT(*)`
+    CREATE TABLE Aliases (
+        Id INTEGER PRIMARY KEY,
+        Alias TEXT,
+        PersonId INTEGER);
+
+    -- 9306 returned by the command `COUNT(*)`
+    CREATE TABLE EmailReceivers (
+        Id INTEGER PRIMARY KEY,
+        EmailId INTEGER,
+    PersonId INTEGER);
+
+We got these results from this webapp: <https://kripken.github.io/sql.js/GUI/>. A lot of preprocessing is required before working with the data. We will likely map emails to countries using regex. In order to relate the emails to events, we will use information from online news.
+
+A graph made of 513 vertices seems reasonable.
 
 # A list of internal milestones up until project milestone 2
 
