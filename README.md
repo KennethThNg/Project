@@ -4,21 +4,19 @@
 
 The Hillary Clinton email controversy arising from the use of private email server for official communications during her tenure as Secretary of State hit the headline of the media in 2015. However the content of the emails was not covered properly and reading relevant information related to it remains a difficult task. The goal of this project is to get some insight from the sensitive and sometimes confidential information publicly available on [Kaggle](https://www.kaggle.com/kaggle/hillary-clinton-emails). What was the Hillary's network? Did she use a private server in order to hide illegal actions? Is Hillary the only one responsible of the controversy? Questions are limitless, but we will focus more specifically on three points which we consider to be the base for any analysis. The first is related to the creation of the Hillary's network (integrating subjects importance, dates and world events) based on the metadata of the messages. The second step required is to classify messages in clusters. Finally, we decide to include geographical position to find out the most important subjects discuss in some regions and to understand if some regions appear to be more in the core of United States and if so for which context.
 
-
-
 # Research questions
 
 ## General questions
-- with who Hillary exchanges emails? (network)
-- what is the frequency exchanges in general ? according to these people?
-- which countries are most addressed ? Are some ignored?
-- what are the main subjects ? according to countries ? according to people?
+- with whom does Hillary exchange emails? (network)
+- what is the frequency exchanges in general? according to these people?
+- which countries are most addressed? Are some ignored?
+- what are the main subjects? according to countries? according to people?
 
 ## Technical questions
 - How can we properly clean the data (handle with rawText)?
 - How can we find the country that the mail is addressed?
 - How can we define the main subjects (define the categories of interest)?
-- Which visualization tools shall we use for countries lexicography fields? for network representation? for exchange frequency? for addressed countries? etc
+- Which visualization tools shall we use for countries lexicography fields? for network representation? for exchange frequency? for addressed countries? etc...
 
 
 # Dataset
@@ -67,24 +65,25 @@ Kaggle provides the same data in two different format: four csv files VS one sql
     CREATE TABLE EmailReceivers (
         Id INTEGER PRIMARY KEY,
         EmailId INTEGER,
-    PersonId INTEGER);
+        PersonId INTEGER);
 
-We got these results from this webapp: <https://kripken.github.io/sql.js/GUI/>. A lot of preprocessing is required before working with the data. It will be the main part in the first step of our analysis. We have to deal with the rawText data by removing common words, lowcasting, stemming, ... We will also likely map emails to countries using regex, create dictionaries for subject recognition. Moreover, in order to relate the emails to events, we will likely use information from online news.
+We got these results from this webapp: <https://kripken.github.io/sql.js/GUI/>. A lot of preprocessing is required before working with the data. It will be the main part in the first step of our analysis. We have to deal with the rawText data by removing common words, lowering, stemming, ... We will also likely map emails to countries using regex, create dictionaries for subject recognition. Moreover, in order to relate the emails to events, we will likely use information from online news.
 
 The network graph will be made of 513 vertices. It seems reasonable.
 
 # A list of internal milestones up until project milestone 2
 
-First of all, we have to get a quick and general comprehension of the dataset. We have to understand how rawText of the Emails Table is structured to catch and extract the major informations of it, namely: Sender, Receiver, Date, Subject, Email (Start-End). Once this made we will be able to start our first steps of our analysis, i.e. data cleaning, text processing, etc.
+First of all, we have to get a quick and general comprehension of the dataset. We will check the precision of the extraction provided in the sql file before cleaning and processing the textual data we have (e.g. lowercase...). It is worth to mention we will spend most of our time here and not only for this milestone. We estimate it to be 60-80% of the work because we expect the given extraction to be poor.
 
-At this stage, we expect to have cleaning our datasets, it means that all the information (as said before Senders, Receivers, etc) are correct and that the content of each email is processed (lowcast, remove common words, may include words transformation, etc). If all of these is made until the end of project 2, it would be a great start since data cleaning takes generally around 60-80% of the work.
+In parallel, one or two members will work on more elaborate functions:
 
-If everything is done before the deadline, we may start to create the necessary functions to get the results according to the list of tasks that we have given in the abstract:
-
-- Create the Hillary's Network (illustrated in a clear point of view including frequency)
-- Create a function that maps emails with countries
-- Elaborate a list of subjects that are common in emails
-- Create a time slider world map according to the frequency of country "apparition" in emails (including relative size per continent..?)
-- Elaborate a lexicography field per country or region
-- Elaborate relative similarities between countries according to lexicography field
+- Create the Hillary's Network (including the frequency dimension in the edges)
+- Mapping an email to countries automatically with the help of a lexicography field per country or region
+- Defining a list of subjects appearing recurrently
+- Create a time slider world map according to the frequency of country “apparition” in emails (including relative size per continent..?)
+- Determining similarities between countries according to lexicography field. For example, we expect Ukraine and Russia to be close to each other
 - Reflection on different visualization tools that we can add up to our analysis to make it clearer and enrich it
+
+# Questions for TAa
+
+Can we use libraries like Keras or NLTK?
