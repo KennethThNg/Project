@@ -29,6 +29,25 @@ class Extractor:
         return None
 
     @staticmethod
+    def destination_alias(content_raw):
+        """
+        Extraction of the alias of the destination.
+
+        :param content_raw: the value in the csv file
+        :type content_raw: string
+        :return: string
+        """
+        for line in content_raw.splitlines():
+            if line.startswith("To: ") and len(line) > 4:
+                last_char = line.find('<')
+                if last_char == -1:
+                    alias = line[4:].strip()
+                else:
+                    alias = line[4:last_char]
+                return alias.strip()
+        return None
+
+    @staticmethod
     def earth_area(content, area):
         """
         Check whether or not the content is related to the area based on keywords.

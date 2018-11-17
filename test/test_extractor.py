@@ -14,6 +14,16 @@ class TestExtractor(unittest.TestCase):
         self.assertIsNone(Extractor.sender_alias(content_empty))
         self.assertIsNone(Extractor.sender_alias(content_none))
 
+    def test_destination_alias(self):
+        content_sam = "Some text\nTo: Sam"
+        email = "To: sullivan jacob j <sullivanjj@state.gov>"
+        content_empty = "Some text\nTo: "
+        content_none = "Some text"
+        self.assertEqual(Extractor.destination_alias(content_sam), "Sam")
+        self.assertEqual(Extractor.destination_alias(email), "sullivan jacob j")
+        self.assertIsNone(Extractor.destination_alias(content_empty))
+        self.assertIsNone(Extractor.destination_alias(content_none))
+
     def test_detect_central_africa(self):
         algeria = "i would like to bomb algeria"
         egypt = "there is revolution in egypt"

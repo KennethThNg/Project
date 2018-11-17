@@ -11,6 +11,6 @@ if __name__ == '__main__':
         print("Enter a valid argument: " + str(arguments))
         sys.exit()
     if sys.argv[1] == 'process_raw':
-        print('TODO')
+        print('Please, use the notebook for that.')
     elif sys.argv[1] == 'train_model':
         print('TODO')
