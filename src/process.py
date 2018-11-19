@@ -3,7 +3,11 @@ File name: process.py
 Python Version: 3.7
 """
 import re
+import nltk
+import pandas as pd
 from nltk.corpus import stopwords
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.stem.snowball import SnowballStemmer
 
 
 class Process:
@@ -28,33 +32,55 @@ class Process:
             return re.sub(r"\s{2,}", " ", with_multiple_space).strip()
 
     @staticmethod
-    def content(raw):
+    def content(raw, lemmatize=False):
         """
         Clean the content from the sentences appearing for every email and stop words.
 
         :param raw: the content as it is in the csv file
         :type raw: string
+        :param lemmatize: how good should we reduce the word. (quality vs time)
+        :type lemmatize: boolean
         :return: string
         """
-        without_common_sentence = []
+        def is_writing_convention(line):
+            return line == "U.S. Department of State" or \
+                    line == "UNCLASSIFIED" or \
+                    line.startswith("Case No.") or \
+                    line.startswith("Doc No.") or \
+                    line.startswith("STATE DEPT") or \
+                    line.startswith("RELEASE IN") or \
+                    line.startswith("SUBJECT TO AGREEMENT") or \
+                    line.startswith("Subject") or \
+                    line.startswith("Sent:") or \
+                    line.startswith("Date:") or \
+                    line.startswith("Cc:") or \
+                    line.startswith("From:") or \
+                    line.startswith("To")
+
+        if lemmatize:
+            lmtzr = WordNetLemmatizer()
+        else:
+            stem = SnowballStemmer('english')
+        useful_sentences = []
+        frequent_words = [w.lower() for w in stopwords.words('english')]
         for line in raw.splitlines():
             line = line.strip()
-            if line != "U.S. Department of State" and \
-                    line != "UNCLASSIFIED" and \
-                    not line.startswith("Case No.") and \
-                    not line.startswith("Doc No.") and \
-                    not line.startswith("STATE DEPT") and \
-                    not line.startswith("RELEASE IN") and \
-                    not line.startswith("SUBJECT TO AGREEMENT") and \
-                    not line.startswith("Subject") and \
-                    not line.startswith("Sent:") and \
-                    not line.startswith("Date:") and \
-                    not line.startswith("Cc:") and \
-                    not line.startswith("From:") and \
-                    not line.startswith("To"):
-                tmp = re.sub(r"[^a-z0-9\s]+", " ", line.lower())
-                tmp =  re.sub(r"\s{2,}", " ", tmp).strip()
-                without_common_sentence.append(tmp)
-        word_list = ' '.join(without_common_sentence).split()
-        filtered_words = [word for word in word_list if word not in stopwords.words('english')]
-        return ' '.join(filtered_words)
+            if not is_writing_convention(line):
+                tmp = line.lower()
+                tmp = re.sub(r"\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}", " ", tmp)
+                sentences = tmp.split('.')
+                for sentence_dirty in sentences:
+                    sentence_not_reduced = []
+                    sent = re.sub(r"[^a-z0-9\s]+", " ", sentence_dirty) # keep only alpha numeric
+                    for word in nltk.word_tokenize(sent):
+                        if word not in frequent_words:
+                            sentence_not_reduced.append(word)
+                    if len(sentence_not_reduced) >= 4:
+                        sentence_reduced = []
+                        for word_raw in sentence_not_reduced:
+                            if lemmatize:
+                                sentence_reduced.append(lmtzr.lemmatize(word_raw))
+                            else:
+                                sentence_reduced.append(stem.stem(word_raw))
+                        useful_sentences.append(' '.join(sentence_reduced) + '.')
+        return ' '.join(useful_sentences)
