@@ -1,5 +1,6 @@
 import unittest
 from src.extractor import Extractor
+from src.process import Process
 
 
 class TestExtractor(unittest.TestCase):
@@ -26,7 +27,7 @@ class TestExtractor(unittest.TestCase):
 
     def test_detect_central_africa(self):
         algeria = "i would like to bomb algeria"
-        egypt = "there is revolution in egypt"
+        egypt = "there is revolution in egypt and it is not a joke"
         kaddafi = "qaddafi will die in the near future"
         bengazi = "we have people we know in benghazi"
         nothing = "this message does not contain any reference"
@@ -45,17 +46,9 @@ class TestExtractor(unittest.TestCase):
         self.assertFalse(Extractor.earth_area(nothing, "central_asia"))
 
     def test_detect_europe(self):
-        france_start = "paris is the target of a new tragedy"
-        france_middle = "this message was written in france by a bot"
-        france_end = "this message was written by a bot for sarkozy"
         eu = "the eu will hurt our companies with their new laws"
-        germany = "this message was written in germany by a bot"
         us = "the united states should not appear in europe"
-        self.assertTrue(Extractor.earth_area(france_start, "europe"))
-        self.assertTrue(Extractor.earth_area(france_middle, "europe"))
-        self.assertTrue(Extractor.earth_area(france_end, "europe"))
         self.assertTrue(Extractor.earth_area(eu, "europe"))
-        self.assertTrue(Extractor.earth_area(germany, "europe"))
         self.assertFalse(Extractor.earth_area(us, "europe"))
 
     def test_detect_far_east(self):

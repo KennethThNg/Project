@@ -4,10 +4,10 @@ Python Version: 3.7
 """
 import re
 import nltk
-import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
+from nltk.tokenize import sent_tokenize
 
 
 class Process:
@@ -32,7 +32,7 @@ class Process:
             return re.sub(r"\s{2,}", " ", with_multiple_space).strip()
 
     @staticmethod
-    def content(raw, lemmatize=False):
+    def content(raw, lemmatize):
         """
         Clean the content from the sentences appearing for every email and stop words.
 
@@ -55,12 +55,12 @@ class Process:
                     line.startswith("Date:") or \
                     line.startswith("Cc:") or \
                     line.startswith("From:") or \
-                    line.startswith("To")
+                    line.startswith("To:")
 
         if lemmatize:
             lmtzr = WordNetLemmatizer()
         else:
-            stem = SnowballStemmer('english')
+            snow = SnowballStemmer('english')
         useful_sentences = []
         frequent_words = [w.lower() for w in stopwords.words('english')]
         for line in raw.splitlines():
@@ -68,19 +68,21 @@ class Process:
             if not is_writing_convention(line):
                 tmp = line.lower()
                 tmp = re.sub(r"\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}", " ", tmp)
-                sentences = tmp.split('.')
+                sentences = sent_tokenize(tmp)
                 for sentence_dirty in sentences:
                     sentence_not_reduced = []
-                    sent = re.sub(r"[^a-z0-9\s]+", " ", sentence_dirty) # keep only alpha numeric
+                    sent = re.sub(r"[^a-z\s]+", " ", sentence_dirty) # keep only alpha
                     for word in nltk.word_tokenize(sent):
                         if word not in frequent_words:
                             sentence_not_reduced.append(word)
+                    ###
                     if len(sentence_not_reduced) >= 4:
                         sentence_reduced = []
                         for word_raw in sentence_not_reduced:
                             if lemmatize:
                                 sentence_reduced.append(lmtzr.lemmatize(word_raw))
                             else:
-                                sentence_reduced.append(stem.stem(word_raw))
-                        useful_sentences.append(' '.join(sentence_reduced) + '.')
-        return ' '.join(useful_sentences)
+                                sentence_reduced.append(snow.stem(word_raw))
+                        ###
+                        useful_sentences.append(' '.join(sentence_reduced))
+        return '|'.join(useful_sentences)

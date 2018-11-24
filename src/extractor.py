@@ -3,6 +3,8 @@ File name: process.py
 Python Version: 3.7
 """
 
+from nltk.stem.snowball import SnowballStemmer
+
 
 class Extractor:
     """
@@ -96,10 +98,13 @@ class Extractor:
         else:
             raise ValueError
 
-        for word in words:
+        snow = SnowballStemmer('english')
+        ctn = content.replace("|", " ")
+        for word_raw in words:
+            word = snow.stem(word_raw)
             words_left = word + " "
             words_middle = " " + word + " "
             words_right = " " + word
-            if content.startswith(words_left) or content.endswith(words_right) or words_middle in content:
+            if ctn.startswith(words_left) or ctn.endswith(words_right) or words_middle in ctn:
                 return True
         return False
