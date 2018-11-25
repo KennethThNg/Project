@@ -98,6 +98,7 @@ After the first cleaning process, we proceeded on text analysis with observation
 # Expectation for milestone 3
 
 Plan for milestone 3:
+
     - Create the Hillary's Network.
     - Carry on the text analysis.
     - Create a data story.
