@@ -63,26 +63,28 @@ class Process:
             snow = SnowballStemmer('english')
         useful_sentences = []
         frequent_words = [w.lower() for w in stopwords.words('english')]
+        content_as_list = []
         for line in raw.splitlines():
             line = line.strip()
             if not is_writing_convention(line):
                 tmp = line.lower()
-                tmp = re.sub(r"\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}", " ", tmp)
-                sentences = sent_tokenize(tmp)
-                for sentence_dirty in sentences:
-                    sentence_not_reduced = []
-                    sent = re.sub(r"[^a-z\s]+", " ", sentence_dirty) # keep only alpha
-                    for word in nltk.word_tokenize(sent):
-                        if word not in frequent_words:
-                            sentence_not_reduced.append(word)
-                    ###
-                    if len(sentence_not_reduced) >= 4:
-                        sentence_reduced = []
-                        for word_raw in sentence_not_reduced:
-                            if lemmatize:
-                                sentence_reduced.append(lmtzr.lemmatize(word_raw))
-                            else:
-                                sentence_reduced.append(snow.stem(word_raw))
-                        ###
-                        useful_sentences.append(' '.join(sentence_reduced))
+                tmp = re.sub(r"\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}", " ", tmp)  # remove emails
+                content_as_list.append(tmp)
+
+        content_as_str = " ".join(content_as_list)
+        for sentence_dirty in sent_tokenize(content_as_str):
+            sent = re.sub(r"[^a-z\s]+", " ", sentence_dirty)  # keep only alpha
+            sentence_not_reduced = []
+            for word in nltk.word_tokenize(sent):
+                if word not in frequent_words:
+                    sentence_not_reduced.append(word)
+            if len(sentence_not_reduced) >= 4:
+                sentence_reduced = []
+                for word_raw in sentence_not_reduced:
+                    if lemmatize:
+                        sentence_reduced.append(lmtzr.lemmatize(word_raw))
+                    else:
+                        sentence_reduced.append(snow.stem(word_raw))
+                ###
+                useful_sentences.append(' '.join(sentence_reduced))
         return '|'.join(useful_sentences)

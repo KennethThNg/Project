@@ -63,6 +63,11 @@ class TestExtractor(unittest.TestCase):
         expected = "hi jason likely die tonight|joke swear really serious"
         self.assertEqual(Process.content(raw, True), expected)
 
+    def test_content_sentence_broken(self):
+        raw = "This sentence starts here but because of its\nlength it\nwill be split into many lines."
+        expected = ""
+        self.assertEqual(Process.content(raw, True), expected)
+
 
 if __name__ == '__main__':
     unittest.main()
