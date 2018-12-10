@@ -49,7 +49,7 @@ class TestExtractor(unittest.TestCase):
             Sent: Wednesday, September 12, 2012 10:16 AM
             This should be the content|Some words will be filtered out. Let's see what happens to plural noons.
         """
-        expected = "let see happen plural noon"
+        expected = "content word filter|let see happen plural noon"
         self.assertEqual(Process.content(raw, False), expected)
 
     def test_content_with_email_stemming(self):
@@ -65,7 +65,7 @@ class TestExtractor(unittest.TestCase):
 
     def test_content_sentence_broken(self):
         raw = "This sentence starts here but because of its\nlength it\nwill be split into many lines."
-        expected = ""
+        expected = "sentence start length split many line"
         self.assertEqual(Process.content(raw, True), expected)
 
 

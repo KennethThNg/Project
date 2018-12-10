@@ -55,7 +55,14 @@ class Process:
                     line.startswith("Date:") or \
                     line.startswith("Cc:") or \
                     line.startswith("From:") or \
-                    line.startswith("To:")
+                    line.startswith("To:") or \
+                    line.startswith("Monday") or \
+                    line.startswith("Tuesday") or \
+                    line.startswith("Wednesday") or \
+                    line.startswith("Thursday") or \
+                    line.startswith("Friday") or \
+                    line.startswith("Saturday") or \
+                    line.startswith("Sunday")
 
         if lemmatize:
             lmtzr = WordNetLemmatizer()
@@ -78,14 +85,16 @@ class Process:
             for word in nltk.word_tokenize(sent):
                 if word not in frequent_words:
                     sentence_not_reduced.append(word)
-            if len(sentence_not_reduced) >= 4:
+            if len(sentence_not_reduced) >= 3:
                 sentence_reduced = []
                 for word_raw in sentence_not_reduced:
                     if lemmatize:
-                        sentence_reduced.append(lmtzr.lemmatize(word_raw))
+                        w = lmtzr.lemmatize(word_raw)
                     else:
-                        sentence_reduced.append(snow.stem(word_raw))
-                ###
-                useful_sentences.append(' '.join(sentence_reduced))
+                        w = snow.stem(word_raw)
+                    if len(w) > 1:
+                        sentence_reduced.append(w)
+                if len(sentence_reduced) >= 3:
+                    useful_sentences.append(' '.join(sentence_reduced))
         return '|'.join(useful_sentences)
 
