@@ -20,6 +20,9 @@
 \usepackage{url}
 \usepackage{latexsym}
 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb, graphicx, multicol, array}
+
 %\setlength\titlebox{5cm}
 
 % You can expand the titlebox if you need extra space
@@ -32,48 +35,155 @@
 
 \author{Rehan Mulakhel \\
   {\tt rehan.mulakhel@epfl.ch} \\\And
-  Second Author \\
-  {\tt email@domain} \\\And
-  Third Author \\
-{\tt email@domain} \\}
+  Brice Repond \\
+  {\tt brice.repond@epfl.ch} \\\And
+  Kenneth Nguyen \\
+{\tt kenneth.nguyen@epfl.ch} \\}
 
 \date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
+TODO
 \end{abstract}
 
 \section{Introduction}
 
-\section{Dataset}
+TODO
 
-Where did we take it from? ...
+\section{Datasets description}
 
-\subsection{Description of the tables}
+Kaggle provides the same data in two different formats: four csv files VS one sqlite file. We only consider the former because the operations we will perform require the built in functions of pandas. The raw data with dimensions have the following shapes:
 
-\subsubsection{Distribution of the date}
+\begin{itemize}
+    \item \texttt{emails.csv} (7945, 22)
+    \item \texttt{persons.csv} (513, 2)
+    \item \texttt{aliases.csv} (850, 3)
+    \item \texttt{email\_receiver.csv} (9306, 3)
+\end{itemize}
 
-\subsection{Recovery process}
+Theses tables form an entity relationship diagram. One would expect the emails to be linked somehow to the persons and the persons to be linked to the aliases. However, the raw data follow is based on the fields of the emails rather than the structure of a well designed database. Indeed, emails fields use (textual!) aliases to join the tables. Therefore, it is not possible to to get the value of the persons directly from the emails.
 
-\subsection{Enrichment}
+The reasons for this inconvenient choice is likely due to the fact that the data were generated before the creation of the structure storing it. The one who gathered the data stopped the process at an early stage, leaving us to fend ourselves. Actually, the few extracted values such as the content are not useful because of the poor quality.
 
-\subsection{Cleaning content}
+Data cleaning is the step which will take the most time. Since we are interested in Hilary's network and the topics covered in the messages, we keep the source of the emails, the destination and the carbon copy (cc) if any, the date and the content.
 
-\section{Emails classification}
+\section{Exploration and data cleaning}
 
-Classification requires an unsupervised algorithm because the data is unstructured.
+Having a clean dataset is essential when we want to provide results or interpret graphs. Indeed, one may lie in a terrible trouble if one neglects this step. A good data treatment has three main steps: exploration, comprehension and then cleaning.
 
-\subsection{Map position}
+In this work, we remark an obvious need of deep data cleaning, in the three datasets. Indeed, after explorating the Aliases and Persons datasets we remark some strong mistakes that lie into the data. We remain that Aliases that correspond to the same person should point on the same personId. Unfortunetly, it is not the case. Indeed, in about 35\% of cases, Aliases that are obviously the same points however on different persons. We explain in the next Section how we handle with this problem.
 
-\subsection{What words reveal}
+We remark also that the emails dataset is really dirty. Concerning the sender and receiver persons, we got around XX\% of missing values. Moreover, because of the previous issue, a lot of isolated emails exchange persist. We elaborate the PersonId fetching algorithm in order to overcome this issue. We explain it in the Section XXX.
+
+Finally we analyze the content of each email. Numerous evident problems appear as the presence of headers in each email (the sender, receiver, date, etc.). Moreover we remark the necessity of applying a deep text processing, in order for instance to match some pair of words (car/cars, Car/car, take/taken, etc). The presence of numerous stopwords was also a motivation for text processing. We detail our text processing approach in the Section XXX.
+
+\subsection{Aliases and Persons}
+
+The relation between persons and aliases tables would normally be one-to-many. However, there are some closed aliases pointing to different persons. For instance, `monica.hanle' alias is not pointing towards the same identifier as `Monica Hanley' as one could reasonably expect. Solving this issue can be done through many algorithms like clustering by the Hammer distance and/or by the longest shared string. This would solve most of the wrong links but some exceptions would be uncaught. Since the number of rows is small, clustering the aliases manually is likely to take less time than implementing the algorithms with the exceptions. Eventually, we reduce the size of the persons table by around a third which is not negligible.
+
+\subsection{Emails}
+
+The subject of an email cannot always be deduced from its content because all messages have an implicit context. The same sentence does not necessarily have the same meaning all the time. It depends on too many parameters like the person who wrote it and the moment when it was written and the social conventions of the time when it was written...
+
+\subsubsection{Distribution over time}
+
+TODO insert picture here
+
+The plot XX shows three periods we call `contexts' we identify them as:
+
+\begin{itemize}
+    \item \texttt{ctx0} from 2009 to 2011
+    \item \texttt{ctx1} from 2011 to 2012 June
+    \item \texttt{ctx2} from 2012 June to 2013
+\end{itemize}
+
+We should keep in mind that some emails may have not been or could have not been disclosed.
+
+It is hard to give an interpretation without introducing external knowledge. We can map the second periods to the Libya intervention in 2011 and the third one to the murder of US ambassador in Libya.
+
+\subsubsection{Sender and Receiver}
+
+The sender column is partially filled with the \texttt{personId} field and 157 \texttt{NaN}. The remaining \texttt{Nan} value by extracting them from the content by the first occurrence of an non-empty line starting by the chars: `From:'. 146 \texttt{NaN} remain in the end.
+
+The receiver column contains a string of an alias. Hence, we would like to use the table \texttt{email\_receivers} which contains the value of the receivers. Unfortunately, the table makes no difference between the main receivers and people to whom the message was copied. Therefore, we fetch the value of \texttt{personId} through the aliases table.  At this point, we recover 7671 out of 7690 (because we only consider not-\texttt{NaN} rows). Following the same procedure as for the sender does not help because that is what was done by the one extracted the value for us...
+
+How can we complete the unknown values? Verifying whether or not the first row appearing in the receiver table is the main receiver shows that There are 1244 emails for which we have the destination \emph{and} for which there are at least 2 rows in \texttt{email\_receivers}. Among those 1244, the first row is the destination 795 times. This number is not huge but it is not small either. Assuming this ratio always holds, it is better to adopt this strategy than choosing randomly. In the end we have not recover a significant number of missing values.
+
+\subsubsection{Content}
+
+A typical email is composed of a sender, a receiver, a time stamp and a content. Some emails are made of many replies. Sometimes the replies come from the same person. We decided to keep those emails as single emails. This will not hurt the results too much since the thread of conversations should be related to the same topics in most cases.
+
+In order to extract the content from the \texttt{RawText} field which contains the content in addition to metadata in a single string, we perform two phases of process we call pre and post-process.
+
+During the pre-process, we filter out the rows starting by common words like `From:' or `To:' and others which appear in all the emails we have read. Next, we lower all the chars, remove the emails using a regex before combining the split lines into a single line because most sentences are break. From this point, the pipeline is easy to describe, we keep only letters, we stem words and keep them if their length is bigger than 1 and the word is not in the stop list provided by NLTK, we keep sentences having at least 3 words. We join all the sentences with the pipe char ($|$).
+
+At this stage, printing all words starting by the string `afg' returns: afg, afganistan, afgh, afgha, afghaiistai, afghalistan, afghan, afghani, afghanisan, afghanist, afghanistan, afghansn, afghanstan, afghariistan, afghathtml, afgna. This shows that we are working with misspelled words. Ideally, one would find a way to recover as much as possible from these frequent errors. But we will keep things simple and let it how it is. During the post-process, we remove the frequent words by setting the threshold of the tf-idf at 3.4. We got this value by testing manually and observing the output of the words which would be removed.
+
+\section{Topics detection}
+
+The size of the dataset is too small to get valid results using common machine learning tools. We have $|\{ emails \}| << |\{ words \}|$. On the other hand, there are potentially a huge number of topics appearing in the few emails we have. The conditions are met for an overfit. We will use two different techniques to discover information: one basic and naive way based on key words, and one more complex based on logistic regression, hoping to reach the same conclusions.
+
+\subsection{Key words}
+
+Enriching data is a common task in data science. It could be useful to map an email to one or many places on the Earth. We consider the following: North America, Latino world, Europe, Africa, Middle East, Central Asia, Far East, Russia (including Ukraine). Each of these columns is a boolean and one email can be situated in more than a single place. One naive system can determine the position based on some key words appearing in the content of the emails. The results of this solution need to be taken with cautious because it contains a lot of false positive when frequent words are used as key words, and a lot of false negative when important words are missing. For our case, we can expect `Obama' to appear frequently even when the content is not related to the United States.
+
+\subsubsection{Emails distribution per region}
+
+If we consider all the dataset and not the feature `North America', emails are dominated by the Middle East and Europe, followed by Central Asia, Far East then Africa. Latino world and Russia do not seem to be concern to much by the emails compared to the others.
+
+If we take what we have called \texttt{ctx0}, then it not a surprise to observe the same distribution as the one we have for the whole dataset. It is because the majority of emails were sent during this moment.
+
+For the \texttt{ctx1} (Fig. TODO), the place dominating is the Africa, followed by Europe and Middle East.
+
+For the last context, we see Africa is again dominating but Middle East beats Europe.
+
+The plots based on key words lead us to the hypothesis we have drawn based on the distribution of the emails date.
+
+\subsection{Machine learning}
+
+The input of our machine learning algorithm are not emails but sentences. The target value will be the three contexts we observe in Fig TODO. The goal is to learn the topics covered in each context.
+
+The regularization parameter is taken at the moment when we see the (cross validation) score decreasing.
+
+The result we get are the following
+
+\begin{description}
+    \item[Context 0] Afghanistan, China, Iraq
+    \item[Context 1] Libya (Qaddafi, NATO, fight, rebel), Egypt (Morsi)
+    \item[Context 2] US Ambassador killed in Benghazi, Morocco, Tunisia, Islam and Muslim (probably because of the movie Innocence of Muslims)
+\end{description}
+
+The above result are computed based on sentences
+
+We can visually see how close are the emails using dendograms. We do not check on the context 0 because it contains too many elements and the plot would be impossible to interpret.
+
+TODO put dendogram ctx1 and ctx2.
+
+The dendogram of context 1 shows two classes. One of them is likey to be related to North Africa which includes Libya (NATO, fly zone, ...) and Egypt. The other class is probably other topics unrelated to this part of the world.
+
+\section{Visualization tools}
+
+\subsection{Hilary's network}
+With whom Hillary Clinton exchanges the most. This is likely the question that interests the most people. We interest in this Section to answer this question. At this aim, we create the Hilary's Network with the people with whom she has the most exchange of emails.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{HillaryNetwork.PNG}
+\end{figure}
+The size of nodes is a relative measure of the total amount of emails that a person has. Similarly, the size of the edges represents the relative number of emails that two persons have each together. The main exchangers are namely: Huma Abedin, Chery Mills, Jake Sullivan, Lauren Jiloty, Sidney Blumenthal. They are mostly political advisors of Hillary Clinton.
+
+\subsection{World Map position}
+
+TODO: Ploter une world map statique si possible (count by pays le nombre de mails qui s'y réfère) Dans le report que thang a envoyé il y a une map monde, peut-être que si thang a le code on pourrait s'en servir.
+
+\subsection{WordCloud}
 
 Words clouds here with dendograms if and only if the number of clusters matches the topics we guess from the clouds or from the $n$-gram.
 
-\section{Network}
-
 \section{Conclusion}
 
+TODO
 
 \begin{thebibliography}{}
 
