@@ -34,23 +34,23 @@
 \title{Name of your project}
 
 \author{Rehan Mulakhel \\
-  {\tt rehan.mulakhel@epfl.ch} \\\And
+  {\tt \{rehan.mulakhel\}} \\\And
   Brice Repond \\
-  {\tt brice.repond@epfl.ch} \\\And
+  {\tt \{brice.repond\}} \\\And
   Kenneth Nguyen \\
-{\tt kenneth.nguyen@epfl.ch} \\}
+{\tt \{kenneth.nguyen\}\{@epfl.ch\}} \\}
 
 \date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-TODO
+Quickly identifying topics from a relatively large amount of textual messages could not be done efficiently a few decades ago. In this paper, we will compare results obtained from a naive algorithm based on key words system coupled with external knowledge against the well known linear regression, on Hillary Clinton emails.
 \end{abstract}
 
 \section{Introduction}
 
-TODO
+The Hillary Clinton email controversy arising from the use of private email server for official communications during her tenure as Secretary of State hit the headline of the media in 2015. However the content of the emails was not covered properly and reading relevant information related to it remains a difficult task. The goal of this project is to get some insight from the sensitive and sometimes confidential information publicly available online. We will use the content of the emails and the network of the connection to draw conclusions.
 
 \section{Datasets description}
 
@@ -63,7 +63,7 @@ Kaggle provides the same data in two different formats: four csv files VS one sq
     \item \texttt{email\_receiver.csv} (9306, 3)
 \end{itemize}
 
-Theses tables form an entity relationship diagram. One would expect the emails to be linked somehow to the persons and the persons to be linked to the aliases. However, the raw data follow is based on the fields of the emails rather than the structure of a well designed database. Indeed, emails fields use (textual!) aliases to join the tables. Therefore, it is not possible to to get the value of the persons directly from the emails.
+Theses tables form an entity relationship diagram. One would expect the emails to be linked somehow to the persons and the persons to be linked to the aliases. However, the raw data is based on the fields of the emails rather than the structure of a well designed database. Indeed, emails fields use (textual!) aliases to join the tables. Therefore, it is not possible to get the value of the persons directly from the emails.
 
 The reasons for this inconvenient choice is likely due to the fact that the data were generated before the creation of the structure storing it. The one who gathered the data stopped the process at an early stage, leaving us to fend ourselves. Actually, the few extracted values such as the content are not useful because of the poor quality.
 
@@ -71,13 +71,7 @@ Data cleaning is the step which will take the most time. Since we are interested
 
 \section{Exploration and data cleaning}
 
-Having a clean dataset is essential when we want to provide results or interpret graphs. Indeed, one may lie in a terrible trouble if one neglects this step. A good data treatment has three main steps: exploration, comprehension and then cleaning.
-
-In this work, we remark an obvious need of deep data cleaning, in the three datasets. Indeed, after explorating the Aliases and Persons datasets we remark some strong mistakes that lie into the data. We remain that Aliases that correspond to the same person should point on the same personId. Unfortunetly, it is not the case. Indeed, in about 35\% of cases, Aliases that are obviously the same points however on different persons. We explain in the next Section how we handle with this problem.
-
-We remark also that the emails dataset is really dirty. Concerning the sender and receiver persons, we got around XX\% of missing values. Moreover, because of the previous issue, a lot of isolated emails exchange persist. We elaborate the PersonId fetching algorithm in order to overcome this issue. We explain it in the Section XXX.
-
-Finally we analyze the content of each email. Numerous evident problems appear as the presence of headers in each email (the sender, receiver, date, etc.). Moreover we remark the necessity of applying a deep text processing, in order for instance to match some pair of words (car/cars, Car/car, take/taken, etc). The presence of numerous stopwords was also a motivation for text processing. We detail our text processing approach in the Section XXX.
+In general, it is not possible to organize the work in a cascade fashion when working with potentially dirty data. Going back and forth cannot be avoided and is required to understand the data. Understanding the data is necessary to improve the cleaning actions or to recover from missing or unusable values. There are easy mistakes or bad design choice we can observe by simply over reading columns. There are hidden mistakes which cannot be spot without carefully reading and \emph{expecting} some values.
 
 \subsection{Aliases and Persons}
 
@@ -85,13 +79,18 @@ The relation between persons and aliases tables would normally be one-to-many. H
 
 \subsection{Emails}
 
-The subject of an email cannot always be deduced from its content because all messages have an implicit context. The same sentence does not necessarily have the same meaning all the time. It depends on too many parameters like the person who wrote it and the moment when it was written and the social conventions of the time when it was written...
+The subject of an email cannot always be deduced from its content because all messages have an implicit context. The same sentence does not necessarily have the same meaning all the time. It depends on too many parameters like the person who wrote it and the moment when it was written and the social conventions at the time when it was written...
 
 \subsubsection{Distribution over time}
 
-TODO insert picture here
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/emails_distribution.png}
+	\caption{Time distribution of all the emails}
+	\label{fig:emails_time_distribution}
+\end{figure}
 
-The plot XX shows three periods we call `contexts' we identify them as:
+The Figure~\ref{fig:emails_time_distribution} shows three periods we call `contexts' we identify them as:
 
 \begin{itemize}
     \item \texttt{ctx0} from 2009 to 2011
@@ -105,9 +104,9 @@ It is hard to give an interpretation without introducing external knowledge. We 
 
 \subsubsection{Sender and Receiver}
 
-The sender column is partially filled with the \texttt{personId} field and 157 \texttt{NaN}. The remaining \texttt{Nan} value by extracting them from the content by the first occurrence of an non-empty line starting by the chars: `From:'. 146 \texttt{NaN} remain in the end.
+The sender column is partially filled with the \texttt{personId} field and 157 \texttt{NaN}. The remaining \texttt{Nan} values by extracting them from the content by the first occurrence of an non-empty line starting by the chars: `From:'. 146 \texttt{NaN} remain in the end.
 
-The receiver column contains a string of an alias. Hence, we would like to use the table \texttt{email\_receivers} which contains the value of the receivers. Unfortunately, the table makes no difference between the main receivers and people to whom the message was copied. Therefore, we fetch the value of \texttt{personId} through the aliases table.  At this point, we recover 7671 out of 7690 (because we only consider not-\texttt{NaN} rows). Following the same procedure as for the sender does not help because that is what was done by the one extracted the value for us...
+The receiver column contains a string of an alias. Hence, we would like to use the table \texttt{email\_receivers} which contains the value of the receivers. Unfortunately, the table makes no difference between the main receivers and people to whom the message was copied. Therefore, we fetch the value of \texttt{personId} through the aliases table. At this point, we recover 7671 out of 7690 (because we only consider not-\texttt{NaN} rows). Following the same procedure as for the sender does not help because that is what was done by the one extracted the value for us...
 
 How can we complete the unknown values? Verifying whether or not the first row appearing in the receiver table is the main receiver shows that There are 1244 emails for which we have the destination \emph{and} for which there are at least 2 rows in \texttt{email\_receivers}. Among those 1244, the first row is the destination 795 times. This number is not huge but it is not small either. Assuming this ratio always holds, it is better to adopt this strategy than choosing randomly. In the end we have not recover a significant number of missing values.
 
@@ -131,13 +130,34 @@ Enriching data is a common task in data science. It could be useful to map an em
 
 \subsubsection{Emails distribution per region}
 
-If we consider all the dataset and not the feature `North America', emails are dominated by the Middle East and Europe, followed by Central Asia, Far East then Africa. Latino world and Russia do not seem to be concern to much by the emails compared to the others.
+If we consider all the dataset and not the feature `North America', emails are dominated by the Middle East and Europe, followed by Central Asia, Far East then Africa. Latino world and Russia do not seem to be concern to much by the emails compared to the others. We will neglect that and consider only the distribution within what we call \texttt{ctx}. 
 
-If we take what we have called \texttt{ctx0}, then it not a surprise to observe the same distribution as the one we have for the whole dataset. It is because the majority of emails were sent during this moment.
+If we take the plot in Figure~\ref{fig:emails_map_distribution_ctx0}, then it not a surprise to observe the same distribution as the one we have for the whole dataset. It is because the majority of emails were sent during this moment.
 
-For the \texttt{ctx1} (Fig. TODO), the place dominating is the Africa, followed by Europe and Middle East.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/emails_map_ctx0.png}
+	\caption{Region distribution in \texttt{ctx0}}
+	\label{fig:emails_map_distribution_ctx0}
+\end{figure}
 
-For the last context, we see Africa is again dominating but Middle East beats Europe.
+For the \texttt{ctx1} in Figure~\ref{fig:emails_map_distribution_ctx1}, the place dominating is the Africa, followed by Europe and Middle East.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/emails_map_ctx1.png}
+	\caption{Region distribution in \texttt{ctx1}}
+	\label{fig:emails_map_distribution_ctx1}
+\end{figure}
+
+For the last context in Figure~\ref{fig:emails_map_distribution_ctx2}, we see that Africa is again dominating but Middle East beats Europe.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/emails_map_ctx2.png}
+	\caption{Region distribution in \texttt{ctx2}}
+	\label{fig:emails_map_distribution_ctx2}
+\end{figure}
 
 The plots based on key words lead us to the hypothesis we have drawn based on the distribution of the emails date.
 
@@ -152,24 +172,49 @@ The result we get are the following
 \begin{description}
     \item[Context 0] Afghanistan, China, Iraq
     \item[Context 1] Libya (Qaddafi, NATO, fight, rebel), Egypt (Morsi)
-    \item[Context 2] US Ambassador killed in Benghazi, Morocco, Tunisia, Islam and Muslim (probably because of the movie Innocence of Muslims)
+    \item[Context 2] US Ambassador killed in Benghazi, Morocco, Tunisia, Islam and Muslim (probably because of the movie Innocence of Muslims), Romney
 \end{description}
 
 The above result are computed based on sentences
 
 We can visually see how close are the emails using dendograms. We do not check on the context 0 because it contains too many elements and the plot would be impossible to interpret.
 
-TODO put dendogram ctx1 and ctx2.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/dendogram_ctx1.png}
+	\caption{Proximity hierarchy in \texttt{ctx1}.}
+	\label{fig:dendogram_ctx1}
+\end{figure}
 
-The dendogram of context 1 shows two classes. One of them is likey to be related to North Africa which includes Libya (NATO, fly zone, ...) and Egypt. The other class is probably other topics unrelated to this part of the world.
+The Figure~\ref{fig:dendogram_ctx1} shows two classes. One of them is likely to be related to North Africa which includes Libya (NATO, fly zone, ...). We can suppose the other class is related to Mohamed Morsi. We can also suppose Egypt and Libya are in the same cluster and the other one contains topics unrelated to this part of the world and unrelated to each other too.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/dendogram_ctx2.png}
+	\caption{Proximity hierarchy in \texttt{ctx2}.}
+	\label{fig:dendogram_ctx2}
+\end{figure}
+
+The Figure~\ref{fig:dendogram_ctx2} shows three topics dominating. We guess there is one cluster containing emails related to the murder of the US ambassador. Another cluster probably contains events related directly or indirectly to the movie `Innocence of Muslims'.
+
+\section{Visualization tools}
+
+\subsection{Hilary's network}
+
+With whom Hillary Clinton exchanges the most. This is likely the question that interests the most people. We interest in this Section to answer this question. At this aim, we create the Hilary's Network with the people with whom she has the most exchange of emails.
+
+The size of nodes is a relative measure of the total amount of emails that a person has. Similarly, the size of the edges represents the relative number of emails that two persons have each together. The main peers are namely: Huma Abedin, Chery Mills, Jake Sullivan, Lauren Jiloty, Sidney Blumenthal. They are mostly political advisers of Hillary Clinton.
 
 \section{Sentiment analysis}
+
 In order to see how the writers or receivers feel about the emails exchanged, we perform sentiment analysis on the emails and proceed into classification according to if the emails is positive or negative. Since the emails are clean, the next step is to analyze each word in the emails to determine the new category which is the sentiment. The new variable sentiment contains three values:
+
 \begin{enumerate}
     \item Positive : 1,
     \item Neutral : 0,
     \item Negative: -1,
 \end{enumerate}
+
 In our dataset, we exclude the neutral emails since they are not in our interest and we study only the positive and negative emails. Since we get our new feature sentiment with values $\{-1,1\}$ the next step is to apply machine learning methods to classify the emails according to the sentiment.\\
 
 First, we plot a wordcloud of the positive emails and the negative emails to analyze what are the most popular in each category.\\
@@ -177,39 +222,26 @@ First, we plot a wordcloud of the positive emails and the negative emails to ana
 Let's recall that Hillary Clinton uses her personal mailbox to exchange professional emails, then it is not astonishing that the dataset contains her personal emails and her professional emails. In the positive wordcloud, we observe words that seem to be very intimate such as 'love', then the positive emails seem to be the personal one. In the other hand, the negative wordcloud contains words that belongs to the lexical field of the war, then most of these emails are professional.\\
 
 The next step is to find a suitable classification methods, the three methods are: the Naive Bayes classifier, the logistic regression and the random forest. First, we split the data into a training set and a test set. We fit each model and get the following accuracy for each models:
+
 \begin{enumerate}
     \item Naive Bayes : $0,33,$
     \item Logistic regression : $0,49$ 
     \item Random forest: $0,46,$
 \end{enumerate}
+
 according to the accuracy, the best classifier seems to be the logistic regression, but the random forest classify well the data since its accuracy is near to the ones of the Logistic regression. To validate the model, we use the cross-validation to get average accuracy.
+
 \begin{enumerate}
     \item Naive Bayes : $0,66,$
     \item Logistic regression : $0,86$ 
     \item Random forest: $0,84,$
 \end{enumerate}
+
 According to this parameter, the Logistic regression is still the best models, but the Random forest seems also to classify well, then to conclude, the best model to determine either the email is positive or negative is the Logistic regression.
-\section{Visualization tools}
-
-\subsection{Hilary's network}
-With whom Hillary Clinton exchanges the most. This is likely the question that interests the most people. We interest in this Section to answer this question. At this aim, we create the Hilary's Network with the people with whom she has the most exchange of emails.
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\linewidth]{HillaryNetwork.PNG}
-\end{figure}
-The size of nodes is a relative measure of the total amount of emails that a person has. Similarly, the size of the edges represents the relative number of emails that two persons have each together. The main exchangers are namely: Huma Abedin, Chery Mills, Jake Sullivan, Lauren Jiloty, Sidney Blumenthal. They are mostly political advisors of Hillary Clinton.
-
-\subsection{World Map position}
-
-TODO: Ploter une world map statique si possible (count by pays le nombre de mails qui s'y réfère) Dans le report que thang a envoyé il y a une map monde, peut-être que si thang a le code on pourrait s'en servir.
-
-\subsection{WordCloud}
-
-Words clouds here with dendograms if and only if the number of clusters matches the topics we guess from the clouds or from the $n$-gram.
 
 \section{Conclusion}
 
-TODO
+The naive algorithm based on key words works surprisingly well in this specific case. But it requires a lot of external knowledge and is prone to miss interesting information. On the other hand, the unsupervised algorithm is easier to implement and produces results which are more easy to interpret. In both cases, external knowledge helps to understand the context.
 
 \begin{thebibliography}{}
 
