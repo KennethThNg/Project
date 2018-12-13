@@ -172,7 +172,23 @@ In order to see how the writers or receivers feel about the emails exchanged, we
 \end{enumerate}
 In our dataset, we exclude the neutral emails since they are not in our interest and we study only the positive and negative emails. Since we get our new feature sentiment with values $\{-1,1\}$ the next step is to apply machine learning methods to classify the emails according to the sentiment.\\
 
-First, we plot a wordcloud of the positive emails and the negative emails to analyze what are the most popular in each category.
+First, we plot a wordcloud of the positive emails and the negative emails to analyze what are the most popular in each category.\\
+
+Let's recall that Hillary Clinton uses her personal mailbox to exchange professional emails, then it is not astonishing that the dataset contains her personal emails and her professional emails. In the positive wordcloud, we observe words that seem to be very intimate such as 'love', then the positive emails seem to be the personal one. In the other hand, the negative wordcloud contains words that belongs to the lexical field of the war, then most of these emails are professional.\\
+
+The next step is to find a suitable classification methods, the three methods are: the Naive Bayes classifier, the logistic regression and the random forest. First, we split the data into a training set and a test set. We fit each model and get the following accuracy for each models:
+\begin{enumerate}
+    \item Naive Bayes : $0,33,$
+    \item Logistic regression : $0,49$ 
+    \item Random forest: $0,46,$
+\end{enumerate}
+according to the accuracy, the best classifier seems to be the logistic regression, but the random forest classify well the data since its accuracy is near to the ones of the Logistic regression. To validate the model, we use the cross-validation to get average accuracy.
+\begin{enumerate}
+    \item Naive Bayes : $0,66,$
+    \item Logistic regression : $0,86$ 
+    \item Random forest: $0,84,$
+\end{enumerate}
+According to this parameter, the Logistic regression is still the best models, but the Random forest seems also to classify well, then to conclude, the best model to determine either the email is positive or negative is the Logistic regression.
 \section{Visualization tools}
 
 \subsection{Hilary's network}
