@@ -163,6 +163,16 @@ TODO put dendogram ctx1 and ctx2.
 
 The dendogram of context 1 shows two classes. One of them is likey to be related to North Africa which includes Libya (NATO, fly zone, ...) and Egypt. The other class is probably other topics unrelated to this part of the world.
 
+\section{Sentiment analysis}
+In order to see how the writers or receivers feel about the emails exchanged, we perform sentiment analysis on the emails and proceed into classification according to if the emails is positive or negative. Since the emails are clean, the next step is to analyze each word in the emails to determine the new category which is the sentiment. The new variable sentiment contains three values:
+\begin{enumerate}
+    \item Positive : 1,
+    \item Neutral : 0,
+    \item Negative: -1,
+\end{enumerate}
+In our dataset, we exclude the neutral emails since they are not in our interest and we study only the positive and negative emails. Since we get our new feature sentiment with values $\{-1,1\}$ the next step is to apply machine learning methods to classify the emails according to the sentiment.\\
+
+First, we plot a wordcloud of the positive emails and the negative emails to analyze what are the most popular in each category.
 \section{Visualization tools}
 
 \subsection{Hilary's network}
