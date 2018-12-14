@@ -31,7 +31,7 @@
 % in the camera-ready version and ask you to change it back.
 
 
-\title{Name of your project}
+\title{Official works with private tools}
 
 \author{Rehan Mulakhel \\
   {\tt \{rehan.mulakhel\}} \\\And
@@ -45,7 +45,7 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Quickly identifying topics from a relatively large amount of textual messages could not be done efficiently a few decades ago. In this paper, we will compare results obtained from a naive algorithm based on key words system coupled with external knowledge against the well known linear regression, on Hillary Clinton emails.
+Quickly identifying topics from a relatively large amount of textual messages could not be done efficiently a few decades ago. In this paper, we will compare results obtained from a naive algorithm based on key words system coupled with external knowledge against the well known linear regression, on Hillary Clinton emails. 
 \end{abstract}
 
 \section{Introduction}
@@ -90,7 +90,7 @@ The subject of an email cannot always be deduced from its content because all me
 	\label{fig:emails_time_distribution}
 \end{figure}
 
-The Figure~\ref{fig:emails_time_distribution} shows three periods we call `contexts' we identify them as:
+The Figure \ref{fig:emails_time_distribution} shows three periods we call `contexts' we identify them as:
 
 \begin{itemize}
     \item \texttt{ctx0} from 2009 to 2011
@@ -132,7 +132,7 @@ Enriching data is a common task in data science. It could be useful to map an em
 
 If we consider all the dataset and not the feature `North America', emails are dominated by the Middle East and Europe, followed by Central Asia, Far East then Africa. Latino world and Russia do not seem to be concern to much by the emails compared to the others. We will neglect that and consider only the distribution within what we call \texttt{ctx}. 
 
-If we take the plot in Figure~\ref{fig:emails_map_distribution_ctx0}, then it not a surprise to observe the same distribution as the one we have for the whole dataset. It is because the majority of emails were sent during this moment.
+If we take the plot in Figure \ref{fig:emails_map_distribution_ctx0}, then it not a surprise to observe the same distribution as the one we have for the whole dataset. It is because the majority of emails were sent during this moment.
 
 \begin{figure}[h]
 	\centering
@@ -141,7 +141,7 @@ If we take the plot in Figure~\ref{fig:emails_map_distribution_ctx0}, then it no
 	\label{fig:emails_map_distribution_ctx0}
 \end{figure}
 
-For the \texttt{ctx1} in Figure~\ref{fig:emails_map_distribution_ctx1}, the place dominating is the Africa, followed by Europe and Middle East.
+For the \texttt{ctx1} in Figure \ref{fig:emails_map_distribution_ctx1}, the place dominating is the Africa, followed by Europe and Middle East.
 
 \begin{figure}[h]
 	\centering
@@ -150,7 +150,7 @@ For the \texttt{ctx1} in Figure~\ref{fig:emails_map_distribution_ctx1}, the plac
 	\label{fig:emails_map_distribution_ctx1}
 \end{figure}
 
-For the last context in Figure~\ref{fig:emails_map_distribution_ctx2}, we see that Africa is again dominating but Middle East beats Europe.
+For the last context in Figure \ref{fig:emails_map_distribution_ctx2}, we see that Africa is again dominating but Middle East beats Europe.
 
 \begin{figure}[h]
 	\centering
@@ -195,49 +195,26 @@ The Figure~\ref{fig:dendogram_ctx1} shows two classes. One of them is likely to 
 	\label{fig:dendogram_ctx2}
 \end{figure}
 
-The Figure~\ref{fig:dendogram_ctx2} shows three topics dominating. We guess there is one cluster containing emails related to the murder of the US ambassador. Another cluster probably contains events related directly or indirectly to the movie `Innocence of Muslims'.
+The Figure \ref{fig:dendogram_ctx2} shows three topics dominating. We guess there is one cluster containing emails related to the murder of the US ambassador. Another cluster probably contains events related directly or indirectly to the movie `Innocence of Muslims'.
 
 \section{Visualization tools}
 
+\subsection{Wordcloud and N-grams}
+What are the most used words in each region ? In this section, we use two different visualisation tools to detect these words by region. Since we have eight plots, we focus only on one region and we choose Africa and especially with the Libyan war.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{images/wordcloud_africa.png}
+	\caption{wordcloud for Africa.}
+	\label{fig:wordcloudaf}
+\end{figure}
+
+The Figure \ref{fig:wordcloudaf} shows the most used words in the emails exchanged in Africa, we observe that the most used word is Libya and Egypt, the there is a connection with Figure \ref{fig:dendogram_ctx1} and assume that both words are in the same cluster.
 \subsection{Hilary's network}
 
 With whom Hillary Clinton exchanges the most. This is likely the question that interests the most people. We interest in this Section to answer this question. At this aim, we create the Hilary's Network with the people with whom she has the most exchange of emails.
 
 The size of nodes is a relative measure of the total amount of emails that a person has. Similarly, the size of the edges represents the relative number of emails that two persons have each together. The main peers are namely: Huma Abedin, Chery Mills, Jake Sullivan, Lauren Jiloty, Sidney Blumenthal. They are mostly political advisers of Hillary Clinton.
-
-\section{Sentiment analysis}
-
-In order to see how the writers or receivers feel about the emails exchanged, we perform sentiment analysis on the emails and proceed into classification according to if the emails is positive or negative. Since the emails are clean, the next step is to analyze each word in the emails to determine the new category which is the sentiment. The new variable sentiment contains three values:
-
-\begin{enumerate}
-    \item Positive : 1,
-    \item Neutral : 0,
-    \item Negative: -1,
-\end{enumerate}
-
-In our dataset, we exclude the neutral emails since they are not in our interest and we study only the positive and negative emails. Since we get our new feature sentiment with values $\{-1,1\}$ the next step is to apply machine learning methods to classify the emails according to the sentiment.\\
-
-First, we plot a wordcloud of the positive emails and the negative emails to analyze what are the most popular in each category.\\
-
-Let's recall that Hillary Clinton uses her personal mailbox to exchange professional emails, then it is not astonishing that the dataset contains her personal emails and her professional emails. In the positive wordcloud, we observe words that seem to be very intimate such as 'love', then the positive emails seem to be the personal one. In the other hand, the negative wordcloud contains words that belongs to the lexical field of the war, then most of these emails are professional.\\
-
-The next step is to find a suitable classification methods, the three methods are: the Naive Bayes classifier, the logistic regression and the random forest. First, we split the data into a training set and a test set. We fit each model and get the following accuracy for each models:
-
-\begin{enumerate}
-    \item Naive Bayes : $0,33,$
-    \item Logistic regression : $0,49$ 
-    \item Random forest: $0,46,$
-\end{enumerate}
-
-according to the accuracy, the best classifier seems to be the logistic regression, but the random forest classify well the data since its accuracy is near to the ones of the Logistic regression. To validate the model, we use the cross-validation to get average accuracy.
-
-\begin{enumerate}
-    \item Naive Bayes : $0,66,$
-    \item Logistic regression : $0,86$ 
-    \item Random forest: $0,84,$
-\end{enumerate}
-
-According to this parameter, the Logistic regression is still the best models, but the Random forest seems also to classify well, then to conclude, the best model to determine either the email is positive or negative is the Logistic regression.
 
 \section{Conclusion}
 
