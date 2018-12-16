@@ -81,4 +81,4 @@ Rehan: RawContent cleaning, recover missing or dirty fields, implementation topi
 
 Brice: recover missing or dirty field, fixing duplicated persons, readme for milestone 1, most of the textual description in the notebook, report structure.
 
-Thang: plot emails per regions, word cloud, readme for milestone 2, presentation.
+Kenneth: plot emails per regions, word cloud, readme for milestone 2, presentation.
