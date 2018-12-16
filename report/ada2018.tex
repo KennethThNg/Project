@@ -20,6 +20,8 @@
 \usepackage{url}
 \usepackage{latexsym}
 
+\usepackage{subcaption}
+
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amsthm,amssymb, graphicx, multicol, array}
 
@@ -31,7 +33,7 @@
 % in the camera-ready version and ask you to change it back.
 
 
-\title{Official works with private tools}
+\title{Official work with private tools}
 
 \author{Rehan Mulakhel \\
   {\tt \{rehan.mulakhel\}} \\\And
@@ -45,12 +47,12 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Quickly identifying topics from a relatively large amount of textual messages could not be done efficiently a few decades ago. In this paper, we will compare results obtained from a naive algorithm based on key words system coupled with external knowledge against the well known linear regression, on Hillary Clinton emails. 
+Identifying topics from a relatively large amount of textual messages could not be done efficiently a few decades ago. In this paper, we will compare results obtained from a naive algorithm based on key words system coupled with external knowledge against traditional machine learning to better understand the sensitive and sometimes confidential information contained in Hillary Clinton's emails.
 \end{abstract}
 
 \section{Introduction}
 
-The Hillary Clinton email controversy arising from the use of private email server for official communications during her tenure as Secretary of State hit the headline of the media in 2015. However the content of the emails was not covered properly and reading relevant information related to it remains a difficult task. The goal of this project is to get some insight from the sensitive and sometimes confidential information publicly available online. We will use the content of the emails and the network of the connection to draw conclusions.
+The Hillary Clinton email controversy arising from the use of private email server for official communications during her tenure as Secretary of State hit the headline of the media in 2015. However the content of the emails was not covered properly and reading relevant information related to it remains a difficult task. We will use the content of the emails and the network of the connection to draw conclusions.
 
 \section{Datasets description}
 
@@ -67,15 +69,9 @@ Theses tables form an entity relationship diagram. One would expect the emails t
 
 The reasons for this inconvenient choice is likely due to the fact that the data were generated before the creation of the structure storing it. The one who gathered the data stopped the process at an early stage, leaving us to fend ourselves. Actually, the few extracted values such as the content are not useful because of the poor quality.
 
-Data cleaning is the step which will take the most time. Since we are interested in Hilary's network and the topics covered in the messages, we keep the source of the emails, the destination and the carbon copy (cc) if any, the date and the content.
+\section{Data exploration}
 
-\section{Exploration and data cleaning}
-
-In general, it is not possible to organize the work in a cascade fashion when working with potentially dirty data. Going back and forth cannot be avoided and is required to understand the data. Understanding the data is necessary to improve the cleaning actions or to recover from missing or unusable values. There are easy mistakes or bad design choice we can observe by simply over reading columns. There are hidden mistakes which cannot be spot without carefully reading and \emph{expecting} some values.
-
-\subsection{Aliases and Persons}
-
-The relation between persons and aliases tables would normally be one-to-many. However, there are some closed aliases pointing to different persons. For instance, `monica.hanle' alias is not pointing towards the same identifier as `Monica Hanley' as one could reasonably expect. Solving this issue can be done through many algorithms like clustering by the Hammer distance and/or by the longest shared string. This would solve most of the wrong links but some exceptions would be uncaught. Since the number of rows is small, clustering the aliases manually is likely to take less time than implementing the algorithms with the exceptions. Eventually, we reduce the size of the persons table by around a third which is not negligible.
+In general, it is not possible to organize the work in a cascade fashion when working with potentially dirty data. Going back and forth cannot be avoided and is required to understand the data. Understanding the data is necessary to improve the cleaning actions or to recover from missing or unusable values. There are easy mistakes or bad design choice we can observe by simply over reading columns. There are hidden mistakes which cannot be spot without carefully reading and \emph{expecting} some values. We describe the recovering process of the missing and/or dirty fields in the notebook.
 
 \subsection{Emails}
 
@@ -104,23 +100,45 @@ It is hard to give an interpretation without introducing external knowledge. We 
 
 \subsubsection{Sender and Receiver}
 
-The sender column is partially filled with the \texttt{personId} field and 157 \texttt{NaN}. The remaining \texttt{Nan} values by extracting them from the content by the first occurrence of an non-empty line starting by the chars: `From:'. 146 \texttt{NaN} remain in the end.
+The number of persons in the network is roughly $300$ after recovering dirty values. The frequency of the messages sent or received changes in time. The topics and words changes too as we will see in section~\ref{sec:topics_detection}. However, we see in Figure~\ref{fig:network_evolution} some names appear in the three contexts. Actually, these nodes are mostly political advisers of Hillary Clinton and they are the strongest links in the network.
 
-The receiver column contains a string of an alias. Hence, we would like to use the table \texttt{email\_receivers} which contains the value of the receivers. Unfortunately, the table makes no difference between the main receivers and people to whom the message was copied. Therefore, we fetch the value of \texttt{personId} through the aliases table. At this point, we recover 7671 out of 7690 (because we only consider not-\texttt{NaN} rows). Following the same procedure as for the sender does not help because that is what was done by the one extracted the value for us...
-
-How can we complete the unknown values? Verifying whether or not the first row appearing in the receiver table is the main receiver shows that There are 1244 emails for which we have the destination \emph{and} for which there are at least 2 rows in \texttt{email\_receivers}. Among those 1244, the first row is the destination 795 times. This number is not huge but it is not small either. Assuming this ratio always holds, it is better to adopt this strategy than choosing randomly. In the end we have not recover a significant number of missing values.
+\begin{figure*}[!t]
+	\centering
+	\begin{subfigure}[b]{0.3\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/network_ctx0.png}
+		\caption[]%
+		{{\small \texttt{ctx0} with $w(e) \geq 8$}}    
+		\label{fig:network_ctx0}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/network_ctx1.png}
+		\caption[]%
+		{{\small \texttt{ctx1} with $w(e) \geq 0$}}  
+		\label{fig:network_ctx1}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/network_ctx2.png}
+		\caption[]%
+		{{\small \texttt{ctx0} with $w(e) \geq 0$}}
+		\label{fig:network_ctx2}
+	\end{subfigure}
+	\caption{The evolution of Hillary's network from 2009 to 2013.}
+	\label{fig:network_evolution}
+\end{figure*}
 
 \subsubsection{Content}
 
 A typical email is composed of a sender, a receiver, a time stamp and a content. Some emails are made of many replies. Sometimes the replies come from the same person. We decided to keep those emails as single emails. This will not hurt the results too much since the thread of conversations should be related to the same topics in most cases.
 
-In order to extract the content from the \texttt{RawText} field which contains the content in addition to metadata in a single string, we perform two phases of process we call pre and post-process.
+During the pre-process, we remove the unnecessary lines and common words which appear in all emails. We keep only sentences having at least three words and join them with the char `$|$'.
 
-During the pre-process, we filter out the rows starting by common words like `From:' or `To:' and others which appear in all the emails we have read. Next, we lower all the chars, remove the emails using a regex before combining the split lines into a single line because most sentences are break. From this point, the pipeline is easy to describe, we keep only letters, we stem words and keep them if their length is bigger than 1 and the word is not in the stop list provided by NLTK, we keep sentences having at least 3 words. We join all the sentences with the pipe char ($|$).
-
-At this stage, printing all words starting by the string `afg' returns: afg, afganistan, afgh, afgha, afghaiistai, afghalistan, afghan, afghani, afghanisan, afghanist, afghanistan, afghansn, afghanstan, afghariistan, afghathtml, afgna. This shows that we are working with misspelled words. Ideally, one would find a way to recover as much as possible from these frequent errors. But we will keep things simple and let it how it is. During the post-process, we remove the frequent words by setting the threshold of the tf-idf at 3.4. We got this value by testing manually and observing the output of the words which would be removed.
+During the post-process, we remove the frequent words by setting the threshold of the tf-idf at 3.4. We got this value by manually testing and observing the output of the words which would be removed.
 
 \section{Topics detection}
+\label{sec:topics_detection}
 
 The size of the dataset is too small to get valid results using common machine learning tools. We have $|\{ emails \}| << |\{ words \}|$. On the other hand, there are potentially a huge number of topics appearing in the few emails we have. The conditions are met for an overfit. We will use two different techniques to discover information: one basic and naive way based on key words, and one more complex based on logistic regression, hoping to reach the same conclusions.
 
@@ -130,44 +148,115 @@ Enriching data is a common task in data science. It could be useful to map an em
 
 \subsubsection{Emails distribution per region}
 
-If we consider all the dataset and not the feature `North America', emails are dominated by the Middle East and Europe, followed by Central Asia, Far East then Africa. Latino world and Russia do not seem to be concern to much by the emails compared to the others. We will neglect that and consider only the distribution within what we call \texttt{ctx}. 
+If we consider all the dataset and not the feature `North America', emails are dominated by the Middle East and Europe, followed by Central Asia, Far East then Africa. Latino world and Russia do not seem to be concern to much by the emails compared to the others. We will neglect that and consider only the distribution within what we call \texttt{ctx} as shown in Figure~\ref{fig:map_distribution_evolution}.
 
-If we take the plot in Figure \ref{fig:emails_map_distribution_ctx0}, then it not a surprise to observe the same distribution as the one we have for the whole dataset. It is because the majority of emails were sent during this moment.
-
-\begin{figure}[h]
+\begin{figure*}[!t]
 	\centering
-	\includegraphics[width=\linewidth]{images/emails_map_ctx0.png}
-	\caption{Region distribution in \texttt{ctx0}}
-	\label{fig:emails_map_distribution_ctx0}
-\end{figure}
+	\begin{subfigure}[b]{0.3\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/emails_map_ctx0.png}
+		\caption[]%
+		{{\small Distribution in \texttt{ctx0}}}    
+		\label{fig:emails_map_distribution_ctx0}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/emails_map_ctx1.png}
+		\caption[]%
+		{{\small Distribution in \texttt{ctx1}}}
+		\label{fig:emails_map_distribution_ctx1}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/emails_map_ctx2.png}
+		\caption[]%
+		{{\small Distribution in \texttt{ctx2}}}
+		\label{fig:emails_map_distribution_ctx2}
+	\end{subfigure}
+	\caption{The evolution of emails distribution from 2009 to 2013 based on key words.}
+	\label{fig:map_distribution_evolution}
+\end{figure*}
+
+If we take the plot in Figure \ref{fig:emails_map_distribution_ctx0}, then it not surprising to observe the same distribution as the one we have for the whole dataset. It is because the majority of emails were sent during this moment. What is surprising is the share Europe takes.
 
 For the \texttt{ctx1} in Figure \ref{fig:emails_map_distribution_ctx1}, the place dominating is the Africa, followed by Europe and Middle East.
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\linewidth]{images/emails_map_ctx1.png}
-	\caption{Region distribution in \texttt{ctx1}}
-	\label{fig:emails_map_distribution_ctx1}
-\end{figure}
-
 For the last context in Figure \ref{fig:emails_map_distribution_ctx2}, we see that Africa is again dominating but Middle East beats Europe.
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\linewidth]{images/emails_map_ctx2.png}
-	\caption{Region distribution in \texttt{ctx2}}
-	\label{fig:emails_map_distribution_ctx2}
-\end{figure}
+The plots based on key words lead us to the hypothesis we have drawn based on the distribution of the emails date. Indeed, Europe looses width from \texttt{ctx1} to \texttt{ctx2} against Africa. It seems safe to consider NATO operation in Libya as the main topic in the middle.
 
-The plots based on key words lead us to the hypothesis we have drawn based on the distribution of the emails date.
+\subsubsection{Word cloud and $N$-grams}
+
+We create clouds to observe the dominant terms in each context in Figure~\ref{fig:word_cloud}. Unfortunately, it does not help much for the \texttt{ctx0}. However, it confirms our hypothesis: \texttt{ctx1} is related to Libya and `quaddafi' while \texttt{ctx2} is related Libya and `embassi' (because of the stemming process).
+
+\begin{figure*}[!t]
+	\centering
+	\begin{subfigure}[b]{0.45\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/word_cloud_ctx1.png}
+		\caption[]%
+		{{\small Word cloud for \texttt{ctx1}}}
+		\label{fig:word_cloud_ctx1}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/word_cloud_ctx2.png}
+		\caption[]%
+		{{\small Word cloud for \texttt{ctx2}}}
+		\label{fig:word_cloud_ctx2}
+	\end{subfigure}
+	\caption{Words dominating in each context.}
+	\label{fig:word_cloud}
+\end{figure*}
+
+We can do better using the $n$-grams. We decided to choose arbitrary $n = 2$. This time we apply the algorithm on the regions rather than the contexts.
+
+For Africa, we get: `terrorist attack', `muslim brotherhood', `al quaeda', `chris steven' (US ambassador), `civil war'.
+
+\begin{description}
+	\item[Africa] Human rights, Libya, policy transition, revolution of 2011.
+	\item[Central Asia] Human rights, Al Qaida, Ben Laden. Pakistant, Saudia Arabia.
+	\item[Europe] Climate change, European Union, UK, human rights.
+	\item[Far East] Petrol, climate change, human rights. Related to specific countries as North Korea, South Korea, Saudi Arabia.
+	\item[Middle east] Human rights, peace, missile defense. Related to Israel, Palestine.
+	\item[North America] Health care, human rights are some subjects.
+	\item[Latino] Contains only around 250 emails about subjects completely different.
+	\item[Russia] Missile defense, human rights, North Korea, arm control are some interesting subjects.
+\end{description}
+
+One final word on the words... We have not seen anything related to Wikileaks yet. It is hard to think Julian Assange name or work were not discussed. Actually, Wikileaks appears in the word cloud per region for Europe, Russia, Middle East, Central Asia and Far East.
 
 \subsection{Machine learning}
 
-The input of our machine learning algorithm are not emails but sentences. The target value will be the three contexts we observe in Fig TODO. The goal is to learn the topics covered in each context.
+Document clustering and topics extraction can be done using unsupervised machine learning algorithm. We visualize the clusters in Figure~\ref{fig:dendograms} where we group \emph{emails}. The \texttt{ctx0} is not computed because it contains to many elements.
+
+\begin{figure*}[!t]
+	\centering
+	\begin{subfigure}[b]{0.4\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/dendogram_ctx1.png}
+		\caption[]%
+		{{\small Emails clusters in \texttt{ctx1}}}
+		\label{fig:dendogram_ctx1}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{images/dendogram_ctx2.png}
+		\caption[]%
+		{{\small Emails clusters in \texttt{ctx2}}}
+		\label{fig:dendogram_ctx2}
+	\end{subfigure}
+	\caption{Dendograms grouped documents by cosine distance.}
+	\label{fig:dendograms}
+\end{figure*}
+
+We know how to extract topics from different books. We will simply adapt our case to make it work. We create our `books' by concatenating \emph{sentences} within the same context.
+
+The inputs of our linear regression are not emails but sentences. The target value will be the three contexts we observe in Figure~\ref{fig:emails_time_distribution}. The goal is to learn the topics covered in each context.
 
 The regularization parameter is taken at the moment when we see the (cross validation) score decreasing.
 
-The result we get are the following
+The result we get are the following:
 
 \begin{description}
     \item[Context 0] Afghanistan, China, Iraq
@@ -175,83 +264,16 @@ The result we get are the following
     \item[Context 2] US Ambassador killed in Benghazi, Morocco, Tunisia, Islam and Muslim (probably because of the movie Innocence of Muslims), Romney
 \end{description}
 
-The above result are computed based on sentences
-
-We can visually see how close are the emails using dendograms. We do not check on the context 0 because it contains too many elements and the plot would be impossible to interpret.
-
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\linewidth]{images/dendogram_ctx1.png}
-	\caption{Proximity hierarchy in \texttt{ctx1}.}
-	\label{fig:dendogram_ctx1}
-\end{figure}
+These topics are convincing.
 
 The Figure~\ref{fig:dendogram_ctx1} shows two classes. One of them is likely to be related to North Africa which includes Libya (NATO, fly zone, ...). We can suppose the other class is related to Mohamed Morsi. We can also suppose Egypt and Libya are in the same cluster and the other one contains topics unrelated to this part of the world and unrelated to each other too.
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\linewidth]{images/dendogram_ctx2.png}
-	\caption{Proximity hierarchy in \texttt{ctx2}.}
-	\label{fig:dendogram_ctx2}
-\end{figure}
-
-The Figure \ref{fig:dendogram_ctx2} shows three topics dominating. We guess there is one cluster containing emails related to the murder of the US ambassador. Another cluster probably contains events related directly or indirectly to the movie `Innocence of Muslims'.
-
-\section{Visualization tools}
-
-\subsection{Wordcloud and N-grams}
-What are the most used words in each region ? In this section, we use two different visualisation tools to detect these words by region. Since we have eight plots, we focus only on one region and we choose Africa and especially with the Libyan war.
-
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=\linewidth]{images/wordcloud_africa.png}
-	\caption{wordcloud for Africa.}
-	\label{fig:wordcloudaf}
-\end{figure}
-
-The Figure \ref{fig:wordcloudaf} shows the most used words in the emails exchanged in Africa, we observe that the most used word is Libya and Egypt, the there is a connection with Figure \ref{fig:dendogram_ctx1} and assume that both words are in the same cluster.
-\subsection{Hilary's network}
-
-With whom Hillary Clinton exchanges the most. This is likely the question that interests the most people. We interest in this Section to answer this question. At this aim, we create the Hilary's Network with the people with whom she has the most exchange of emails.
-
-The size of nodes is a relative measure of the total amount of emails that a person has. Similarly, the size of the edges represents the relative number of emails that two persons have each together. The main peers are namely: Huma Abedin, Chery Mills, Jake Sullivan, Lauren Jiloty, Sidney Blumenthal. They are mostly political advisers of Hillary Clinton.
+The Figure \ref{fig:dendogram_ctx2} shows at least two topics dominating. We guess there is one cluster containing emails related to the murder of the US ambassador. Another one probably contains events related directly or indirectly to the movie `Innocence of Muslims'.
 
 \section{Conclusion}
 
 The naive algorithm based on key words works surprisingly well in this specific case. But it requires a lot of external knowledge and is prone to miss interesting information. On the other hand, the unsupervised algorithm is easier to implement and produces results which are more easy to interpret. In both cases, external knowledge helps to understand the context.
 
-\begin{thebibliography}{}
-
-\bibitem[\protect\citename{Aho and Ullman}1972]{Aho:72}
-Alfred~V. Aho and Jeffrey~D. Ullman.
-\newblock 1972.
-\newblock {\em The Theory of Parsing, Translation and Compiling}, volume~1.
-\newblock Prentice-{Hall}, Englewood Cliffs, NJ.
-
-\bibitem[\protect\citename{{American Psychological Association}}1983]{APA:83}
-{American Psychological Association}.
-\newblock 1983.
-\newblock {\em Publications Manual}.
-\newblock American Psychological Association, Washington, DC.
-
-\bibitem[\protect\citename{{Association for Computing Machinery}}1983]{ACM:83}
-{Association for Computing Machinery}.
-\newblock 1983.
-\newblock {\em Computing Reviews}, 24(11):503--512.
-
-\bibitem[\protect\citename{Chandra \bgroup et al.\egroup }1981]{Chandra:81}
-Ashok~K. Chandra, Dexter~C. Kozen, and Larry~J. Stockmeyer.
-\newblock 1981.
-\newblock Alternation.
-\newblock {\em Journal of the Association for Computing Machinery},
-  28(1):114--133.
-
-\bibitem[\protect\citename{Gusfield}1997]{Gusfield:97}
-Dan Gusfield.
-\newblock 1997.
-\newblock {\em Algorithms on Strings, Trees and Sequences}.
-\newblock Cambridge University Press, Cambridge, UK.
-
-\end{thebibliography}
+It is feasible to split the emails into private and professional category by identifying the personal contact in the network. Running the unsupervised algorithms could display embarrassing information. In the end, it is a bad idea to mix private and professional tools which can lead to dangerous leaks. This may also reduce the number of burn out and improve the well-being of people. But this is another subject.
 
 \end{document}
