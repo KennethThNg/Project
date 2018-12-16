@@ -99,6 +99,7 @@ We should keep in mind that some emails may have not been or could have not been
 It is hard to give an interpretation without introducing external knowledge. We can map the second periods to the Libya intervention in 2011 and the third one to the murder of US ambassador in Libya.
 
 \subsubsection{Sender and Receiver}
+\label{sec:sender_receiver}
 
 The number of persons in the network is roughly $300$ after recovering dirty values. The frequency of the messages sent or received changes in time. The topics and words changes too as we will see in section~\ref{sec:topics_detection}. However, we see in Figure~\ref{fig:network_evolution} some names appear in the three contexts. Actually, these nodes are mostly political advisers of Hillary Clinton and they are the strongest links in the network.
 
@@ -122,7 +123,7 @@ The number of persons in the network is roughly $300$ after recovering dirty val
 		\centering
 		\includegraphics[width=\linewidth]{images/network_ctx2.png}
 		\caption[]%
-		{{\small \texttt{ctx0} with $w(e) \geq 0$}}
+		{{\small \texttt{ctx2} with $w(e) \geq 0$}}
 		\label{fig:network_ctx2}
 	\end{subfigure}
 	\caption{The evolution of Hillary's network from 2009 to 2013.}
@@ -179,7 +180,7 @@ If we consider all the dataset and not the feature `North America', emails are d
 
 If we take the plot in Figure \ref{fig:emails_map_distribution_ctx0}, then it not surprising to observe the same distribution as the one we have for the whole dataset. It is because the majority of emails were sent during this moment. What is surprising is the share Europe takes.
 
-For the \texttt{ctx1} in Figure \ref{fig:emails_map_distribution_ctx1}, the place dominating is the Africa, followed by Europe and Middle East.
+For the \texttt{ctx1} in Figure \ref{fig:emails_map_distribution_ctx1}, the dominating place is Africa, followed by Europe then Middle East.
 
 For the last context in Figure \ref{fig:emails_map_distribution_ctx2}, we see that Africa is again dominating but Middle East beats Europe.
 
@@ -209,13 +210,11 @@ We create clouds to observe the dominant terms in each context in Figure~\ref{fi
 	\label{fig:word_cloud}
 \end{figure*}
 
-We can do better using the $n$-grams. We decided to choose arbitrary $n = 2$. This time we apply the algorithm on the regions rather than the contexts.
-
-For Africa, we get: `terrorist attack', `muslim brotherhood', `al quaeda', `chris steven' (US ambassador), `civil war'.
+We can do better using the $n$-grams. We arbitrary decided to choose $n = 2$. This time we apply the algorithm on the regions rather than the contexts.
 
 \begin{description}
 	\item[Africa] Human rights, Libya, policy transition, revolution of 2011.
-	\item[Central Asia] Human rights, Al Qaida, Ben Laden. Pakistant, Saudia Arabia.
+	\item[Central Asia] Human rights, Al Qaida, Ben Laden. Pakistan, Saudi Arabia.
 	\item[Europe] Climate change, European Union, UK, human rights.
 	\item[Far East] Petrol, climate change, human rights. Related to specific countries as North Korea, South Korea, Saudi Arabia.
 	\item[Middle east] Human rights, peace, missile defense. Related to Israel, Palestine.
@@ -223,6 +222,8 @@ For Africa, we get: `terrorist attack', `muslim brotherhood', `al quaeda', `chri
 	\item[Latino] Contains only around 250 emails about subjects completely different.
 	\item[Russia] Missile defense, human rights, North Korea, arm control are some interesting subjects.
 \end{description}
+
+Human rights occur frequently in the documents. It is likely linked to the fact that the majority of emails are produced by her political advisers as we have seen in Section~\ref{sec:sender_receiver}, who express themselves in diplomatic terms.
 
 One final word on the words... We have not seen anything related to Wikileaks yet. It is hard to think Julian Assange name or work were not discussed. Actually, Wikileaks appears in the word cloud per region for Europe, Russia, Middle East, Central Asia and Far East.
 
@@ -252,21 +253,15 @@ Document clustering and topics extraction can be done using unsupervised machine
 
 We know how to extract topics from different books. We will simply adapt our case to make it work. We create our `books' by concatenating \emph{sentences} within the same context.
 
-The inputs of our linear regression are not emails but sentences. The target value will be the three contexts we observe in Figure~\ref{fig:emails_time_distribution}. The goal is to learn the topics covered in each context.
-
-The regularization parameter is taken at the moment when we see the (cross validation) score decreasing.
-
-The result we get are the following:
+The inputs of our linear regression are not emails but sentences. The target value will be the three contexts we observe in Figure~\ref{fig:emails_time_distribution}. The goal is to learn the topics covered in each context. The regularization parameter is taken at the moment when we see the (cross validation) score decreasing. The result we get are the following:
 
 \begin{description}
     \item[Context 0] Afghanistan, China, Iraq
     \item[Context 1] Libya (Qaddafi, NATO, fight, rebel), Egypt (Morsi)
-    \item[Context 2] US Ambassador killed in Benghazi, Morocco, Tunisia, Islam and Muslim (probably because of the movie Innocence of Muslims), Romney
+    \item[Context 2] US Ambassador killed in Benghazi, Morocco, Tunisia, Islam and Muslim (due to the movie Innocence of Muslims), Romney
 \end{description}
 
-These topics are convincing.
-
-The Figure~\ref{fig:dendogram_ctx1} shows two classes. One of them is likely to be related to North Africa which includes Libya (NATO, fly zone, ...). We can suppose the other class is related to Mohamed Morsi. We can also suppose Egypt and Libya are in the same cluster and the other one contains topics unrelated to this part of the world and unrelated to each other too.
+These topics are convincing. The Figure~\ref{fig:dendogram_ctx1} shows two classes. One of them is likely to be related to North Africa which includes Libya (NATO, fly zone, ...). We can suppose the other class is related to Mohamed Morsi. We can also suppose Egypt and Libya are in the same cluster and the other one contains topics unrelated to this part of the world and unrelated to each other too.
 
 The Figure \ref{fig:dendogram_ctx2} shows at least two topics dominating. We guess there is one cluster containing emails related to the murder of the US ambassador. Another one probably contains events related directly or indirectly to the movie `Innocence of Muslims'.
 
@@ -274,6 +269,6 @@ The Figure \ref{fig:dendogram_ctx2} shows at least two topics dominating. We gue
 
 The naive algorithm based on key words works surprisingly well in this specific case. But it requires a lot of external knowledge and is prone to miss interesting information. On the other hand, the unsupervised algorithm is easier to implement and produces results which are more easy to interpret. In both cases, external knowledge helps to understand the context.
 
-It is feasible to split the emails into private and professional category by identifying the personal contact in the network. Running the unsupervised algorithms could display embarrassing information. In the end, it is a bad idea to mix private and professional tools which can lead to dangerous leaks. This may also reduce the number of burn out and improve the well-being of people. But this is another subject.
+It is feasible to split the emails into private and professional category by identifying the personal contacts in the network. Running the unsupervised algorithms could display embarrassing information. In the end, it is a bad idea to mix private and professional tools which can lead to dangerous leaks. This may also reduce the number of burn out and improve the well-being of people. But this is another subject.
 
 \end{document}
