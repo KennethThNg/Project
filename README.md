@@ -75,10 +75,21 @@ The network graph will be made of roughly 500 vertices. It seems reasonable.
 
 Can we use libraries like Keras or NLTK? (The answer is yes)
 
+# Update for milestone 2
+## Cleaning
+Since we had a first look on the dataset, we notice that the dataset is really dirty and the cleaning process might last longer as expected. We managed first to extract the sender, receivers, subjects but most of these features are missing, then we had to extract these features manually. We observed also that there many aliases to design a person for example 'h' or 'H' stand for 'Hillary' and some words are mispelled. New features were created to help us in our analysis, these features are the different regions where emails were exchanged, these features were created by a method to extract the words in the documents that reveal the region. For example, if Lybia were mentionned, then the email might come from Africa or Middle East. The new created region features are  boolean and indicate the emails origin. We have Africa, Europe, Middle East, Far East, Central Asia, North America, Latin America and Russia. The rawText feature containing the documents has been cleaned, all the characters were transformed in lowercase, the punctuation and redundant words were removed so that we get a feature content which is the cleaned rawText.
+ ## Text analysis
+After the first cleaning process, we proceeded on text analysis with observational studies and data visualization. Our first interests were focused on the mails origin and where most of the emails were exchanged. We have noticed that most of the emails came from North America, which seemed to be obvious, and a large part came from middle east which was quite intresting. A graphic according to the date were build and we observed a peak between 2010 and 2012 during the revolution period of the Maghreb. The word's frequency has been also analyzed, this is for the topics extraction of each emails. Wordclouds were also created to get an another visulization of the word's frequency and we used dendogram to visualize the group of emails.
+
+# Update for Milestone 3
+- Hillary's Network creation
+- Other text analysis
+- Report writing
+
 # Contribution of group members
 
 Rehan: RawContent cleaning, recover missing or dirty fields, implementation topics detection, report.
 
 Brice: recover missing or dirty field, fixing duplicated persons, readme for milestone 1, most of the textual description in the notebook, report structure.
 
-Kenneth: plot emails per regions, word cloud, readme for milestone 2, presentation.
+Kenneth: plot emails per regions, word cloud, readme for milestone 2, report, presentation.
